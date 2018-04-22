@@ -1,6 +1,7 @@
 class Game {
   static final int playerWidth = 10, playerHeight = 70;
   static final int ballRadius = 7;
+  static final int maxBallYVelocity = 100;
   static final int maxPlayerVelocity = 200; // in pixels per second
 
   private final GameState state;
@@ -21,11 +22,16 @@ class Game {
     rect(position.x - playerWidth / 2, position.y - playerHeight / 2, playerWidth, playerHeight);
   }
   
-  boolean ballPlayerCollision(PVector ball, PVector player) {
-    return (player.y + playerHeight / 2 > ball.y - ballRadius) && // ball is above the bottom end of player
-       (player.y - playerHeight / 2 < ball.y + ballRadius) && // ball is below the top end of player
-       (player.x + playerWidth / 2 > ball.x - ballRadius) && // ball is to the left from the right end of player
-       (player.x - playerWidth / 2 < ball.x + ballRadius); // ball is to the r from the left end of player
+  void handleBallPlayerCollision(Player player, PVector playerPos, boolean isLeft) {
+    PVector ball = state.ballPosition, ballVelocity = state.ballVelocity;
+    if (!((playerPos.y + playerHeight / 2 > ball.y - ballRadius) && // ball is above the bottom end of player
+       (playerPos.y - playerHeight / 2 < ball.y + ballRadius) && // ball is below the top end of player
+       (playerPos.x + playerWidth / 2 > ball.x - ballRadius) && // ball is to the left from the right end of player
+       (playerPos.x - playerWidth / 2 < ball.x + ballRadius))) return; // ball is to the r from the left end of player
+    ballVelocity.x = abs(ballVelocity.x) * (isLeft ? 1 : -1);
+    ballVelocity.y = map(ball.y - playerPos.y, -playerHeight / 2, playerHeight / 2, -maxBallYVelocity, maxBallYVelocity);
+    
+    player.touchedBall();
   }
   
   void announce(String message) {
@@ -56,14 +62,9 @@ class Game {
       ballVelocity.y = abs(ballVelocity.y);
     if (ballPosition.y + ballRadius > height)
       ballVelocity.y = -abs(ballVelocity.y);
-    if (ballPlayerCollision(ballPosition, leftPosition)) {
-      ballVelocity.x = abs(ballVelocity.x);
-      leftPlayer.touchedBall();
-    }
-    if (ballPlayerCollision(ballPosition, rightPosition)) {
-      ballVelocity.x = -abs(ballVelocity.x);
-      rightPlayer.touchedBall();
-    }
+    handleBallPlayerCollision(leftPlayer, leftPosition, true);
+    handleBallPlayerCollision(rightPlayer, rightPosition, false);
+    
     if(ballPosition.x < 0) {
       leftPlayer.gameOver(false);
       rightPlayer.gameOver(true);
