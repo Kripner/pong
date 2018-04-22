@@ -2,6 +2,7 @@ class Game {
   static final int playerWidth = 10, playerHeight = 70;
   static final int ballRadius = 7;
   static final int maxBallYVelocity = 100;
+  static final int ballXVelocity = 300;
   static final int maxPlayerVelocity = 200; // in pixels per second
 
   private final GameState state;

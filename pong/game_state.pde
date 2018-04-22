@@ -12,6 +12,6 @@ class GameState {
   
   public void reset() {
     ballPosition = new PVector(width / 2, height / 2);
-    ballVelocity = new PVector(-300, random(Game.maxBallYVelocity)); // in pixels per second
+    ballVelocity = new PVector(-Game.ballXVelocity, random(-Game.maxBallYVelocity, Game.maxBallYVelocity)); // in pixels per second
   }
 }
