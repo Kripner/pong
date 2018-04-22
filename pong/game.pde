@@ -10,6 +10,8 @@ class Game {
   private final boolean visual;
   
   private long lastFrameMillis = -1;
+  private int leftScore = 0;
+  private int rightScore = 0;
   
   Game(Player leftPlayer, Player rightPlayer, boolean visual) {
     state = new GameState();
@@ -31,6 +33,7 @@ class Game {
     ballVelocity.x = abs(ballVelocity.x) * (isLeft ? 1 : -1);
     ballVelocity.y = map(ball.y - playerPos.y, -playerHeight / 2, playerHeight / 2, -maxBallYVelocity, maxBallYVelocity);
     
+    
     player.touchedBall();
   }
   
@@ -41,10 +44,10 @@ class Game {
     text(message, width / 2 - 75, height / 2);
   }
   
-  void nextFrame() {
+  boolean nextFrame() {
     if (lastFrameMillis == -1) {
       lastFrameMillis = millis();
-      return;
+      return false;
     }
     if (visual) draw();
     
@@ -68,14 +71,19 @@ class Game {
     if(ballPosition.x < 0) {
       leftPlayer.gameOver(false);
       rightPlayer.gameOver(true);
+      rightScore += 1;
+      return true;
     }
     if(ballPosition.x > width) {
       leftPlayer.gameOver(true);
       rightPlayer.gameOver(false);
+      leftScore += 1;
+      return true;
     }
     
     handleAction(leftPlayer, true, leftPosition, deltaT);
     handleAction(rightPlayer, false, rightPosition, deltaT);
+    return false;
   }
   
   private void handleAction(Player player, boolean isLeft, PVector playerPosition, double deltaT) {
@@ -89,11 +97,19 @@ class Game {
   }
   
   private void draw() {
-    background(255);
-    fill(0);
+    background(0);
+    fill(255);
     
     drawPlayer(state.leftPosition);
     drawPlayer(state.rightPosition);
     ellipse(state.ballPosition.x, state.ballPosition.y, ballRadius * 2, ballRadius * 2);
+    
+    textSize(24);
+    text(String.valueOf(leftScore), 20, 40);
+    text(String.valueOf(rightScore), width - 40, 40);
+  }
+  
+  public void reset() {
+    state.reset();
   }
 }

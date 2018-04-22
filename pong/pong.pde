@@ -5,5 +5,7 @@ void setup() {
 }
 
 void draw() {
-  game.nextFrame();
+  if(game.nextFrame()) {
+    game.reset();
+  }
 }
