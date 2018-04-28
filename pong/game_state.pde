@@ -5,13 +5,13 @@ class GameState {
    PVector ballVelocity;
   
   GameState() {
-    leftPosition = new PVector(Game.playerWidth / 2, height / 2);
-    rightPosition = new PVector(width - Game.playerWidth / 2, height / 2);
+    leftPosition = new PVector(Game.playerWidth / 2, Game.HEIGHT / 2);
+    rightPosition = new PVector(Game.WIDTH - Game.playerWidth / 2, Game.HEIGHT / 2);
     reset();
   }
   
   public void reset() {
-    ballPosition = new PVector(width / 2, height / 2);
-    ballVelocity = new PVector(-Game.ballXVelocity, random(-Game.maxBallYVelocity, Game.maxBallYVelocity)); // in pixels per second
+    ballPosition = new PVector(Game.WIDTH / 2, Game.HEIGHT / 2);
+    ballVelocity = new PVector(-Game.minBallXVelocity, random(-Game.maxBallYVelocity, Game.maxBallYVelocity)); // in pixels per second
   }
 }

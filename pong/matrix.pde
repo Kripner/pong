@@ -11,6 +11,10 @@ class Matrix {
     }
   }
   
+  private Matrix(float[][] data) {
+    this.data = data;
+  }
+  
   public float[] timesVector(float[] vector) {
     float[] result = new float[height()];
     for (int row = 0; row < height(); ++row) {
@@ -28,5 +32,25 @@ class Matrix {
   
   public int width() {
     return data[0].length;
+  }
+  
+  public Matrix crossover(Matrix another) {
+    assert another.height() == height() && another.width() == width();
+    int middleRow = (int) random(height());
+    float[][] newMatrix = new float[height()][];
+    for (int row = 0; row < height(); ++row) {
+      if (row < middleRow) newMatrix[row] = data[row];
+      else newMatrix[row] = another.data[row];
+    }
+    return new Matrix(newMatrix);
+  }
+  
+  public void mutate(float prob) {
+    for (int row = 0; row < height(); ++row) {
+      for (int column = 0; column < width(); ++column) {
+        if (random(1) < prob)
+          data[row][column] += randomGaussian() * data[row][column] * 0.1;
+      }
+    }
   }
 }

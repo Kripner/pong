@@ -1,24 +1,35 @@
 class Game {
+  static final int WIDTH = 750;
+  static final int HEIGHT = 300;
+  
   static final int playerWidth = 10, playerHeight = 70;
   static final int ballRadius = 7;
   static final int maxBallYVelocity = 100;
-  static final int ballXVelocity = 300;
+  static final int minBallXVelocity = 300;
   static final int maxPlayerVelocity = 200; // in pixels per second
+  private static final float defaultAcceleration = 1.001;
 
   private final GameState state;
   private final Player leftPlayer;
   private final Player rightPlayer;
   private final boolean visual;
+  private final float ballAcceleration;
   
   private long lastFrameMillis = -1;
   private int leftScore = 0;
   private int rightScore = 0;
+  private double time = 0; // how long the game lasted so far (in millis)
   
-  Game(Player leftPlayer, Player rightPlayer, boolean visual) {
+  Game(Player leftPlayer, Player rightPlayer, boolean visual, float ballAcceleration) {
     state = new GameState();
     this.visual = visual;
     this.leftPlayer = leftPlayer;
     this.rightPlayer = rightPlayer;
+    this.ballAcceleration = ballAcceleration;
+  }
+  
+  Game(Player leftPlayer, Player rightPlayer, boolean visual) {
+    this(leftPlayer, rightPlayer, visual, defaultAcceleration);
   }
   
   void drawPlayer(PVector position) {
@@ -38,33 +49,40 @@ class Game {
     player.touchedBall();
   }
   
-  void announce(String message) {
-    print(message);
-    textSize(32);
-    fill(0, 102, 153);
-    text(message, width / 2 - 75, height / 2);
-  }
+  //void announce(String message) {
+  //  print(message);
+  //  textSize(32);
+  //  fill(0, 102, 153);
+  //  text(message, width / 2 - 75, height / 2);
+  //}
   
   boolean nextFrame() {
     if (lastFrameMillis == -1) {
       lastFrameMillis = millis();
       return false;
     }
+    long now = millis();
+    double deltaT = (now - lastFrameMillis) / 1000D;
+    lastFrameMillis = now;
+    
+    return nextFrame(deltaT);
+  }
+  
+  private boolean nextFrame(double deltaT) {
     if (visual) draw();
     
     PVector leftPosition = state.leftPosition, rightPosition = state.rightPosition;
     PVector ballPosition = state.ballPosition, ballVelocity = state.ballVelocity;
     
-    long now = millis();
-    double deltaT = (now - lastFrameMillis) / 1000D;
-    lastFrameMillis = now;
+    time += deltaT;
     
+    ballVelocity.x *= ballAcceleration;
     ballPosition.x += ballVelocity.x * deltaT;
     ballPosition.y += ballVelocity.y * deltaT;
     
     if (ballPosition.y - ballRadius < 0)
       ballVelocity.y = abs(ballVelocity.y);
-    if (ballPosition.y + ballRadius > height)
+    if (ballPosition.y + ballRadius > Game.HEIGHT)
       ballVelocity.y = -abs(ballVelocity.y);
     handleBallPlayerCollision(leftPlayer, leftPosition, true);
     handleBallPlayerCollision(rightPlayer, rightPosition, false);
@@ -75,7 +93,7 @@ class Game {
       rightScore += 1;
       return true;
     }
-    if(ballPosition.x > width) {
+    if(ballPosition.x > Game.WIDTH) {
       leftPlayer.gameOver(true);
       rightPlayer.gameOver(false);
       leftScore += 1;
@@ -94,7 +112,7 @@ class Game {
       playerPosition.y -= deltaY;
     else if (action == Action.GO_DOWN)
       playerPosition.y += deltaY;
-    playerPosition.y = constrain(playerPosition.y, playerHeight / 2, height - playerHeight / 2);
+    playerPosition.y = constrain(playerPosition.y, playerHeight / 2, Game.HEIGHT - playerHeight / 2);
   }
   
   private void draw() {
@@ -107,10 +125,19 @@ class Game {
     
     textSize(24);
     text(String.valueOf(leftScore), 20, 40);
-    text(String.valueOf(rightScore), width - 40, 40);
+    text(String.valueOf(rightScore), Game.WIDTH - 40, 40);
   }
   
-  public void reset() {
+  void playToEnd(double frequency) {
+    while(!nextFrame(1D/frequency))
+      ;
+  }
+  
+  double getTime() {
+    return time;
+  }
+  
+  void reset() {
     state.reset();
   }
 }

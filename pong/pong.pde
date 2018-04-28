@@ -1,11 +1,17 @@
-Game game;
+Game currentGame;
+Population population;
 void setup() {
   size(750, 300);
-  game = new Game(new HumanPlayer(), new GAPlayer(), true);
+  population = new Population(50);
 }
 
 void draw() {
-  if(game.nextFrame()) {
-    game.reset();
+  if (currentGame == null || currentGame.nextFrame()) {
+    //println("Training...");
+    //population.train(250);
+    //println("Training completed");
+    
+    
+    currentGame = new Game(new AIPlayer(), new GAPlayer(), true);
   }
 }
